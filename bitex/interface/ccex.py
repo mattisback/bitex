@@ -32,7 +32,7 @@ class CCEX(RESTInterface):
 
     def _get_supported_pairs(self):
         """Return a list of supported pairs."""
-        return requests.get('https://c-cex.com/t/pairs.json').json()['pairs']
+        return requests.request('GET', 'https://c-cex.com/t/pairs.json').json()['pairs']
 
     # Public Endpoints
     @format_response

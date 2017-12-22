@@ -12,7 +12,7 @@ class CCEXFormattedResponse(FormattedResponse):
             'ask': float(response_data['ticker']['sell']),
             'low': float(response_data['ticker']['low']),
             'high': float(response_data['ticker']['high']),
-            # 'volume': float(response_data['ticker']['BaseVolume']),
+            'volume': float('nan'),
             'last': float(response_data['ticker']['lastprice'])
         }
         # {'ticker': {'updated': 1513591935, 'lastbuy': 0.03794999, 'buy': 0.03794999, 'sell': 0.03798,

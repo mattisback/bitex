@@ -2,25 +2,29 @@ from bitex.interface.formatters import FormattedResponse
 from datetime import datetime
 
 
-class BitfinexFormattedResponse(FormattedResponse):
+class TheRockTradingFormattedResponse(FormattedResponse):
 
     def _format_ticker(self, response):
         response_data = response.json()
+        d = response_data['date']
+        if ":" == d[-3:-2]:
+            d = d[:-3] + d[-2:]
         return {
-            'timestamp': datetime.fromtimestamp(float(response_data['timestamp'])),
+            'timestamp': datetime.strptime(d, '%Y-%m-%dT%H:%M:%S.%f%z'),
             'bid': float(response_data['bid']),
             'ask': float(response_data['ask']),
             'low': float(response_data['low']),
             'high': float(response_data['high']),
-            'volume': float(response_data['volume']),
-            'last': float(response_data['last_price'])
+            'volume': float(response_data['volume_traded']),
+            'last': float(response_data['last'])
         }
-        # {'bid': '18629.0', 'timestamp': '1513589744.5260189', 'ask': '18630.0', 'mid': '18629.5', 'low': '18010.0',
-        #  'volume': '63690.87027664', 'last_price': '18630.0', 'high': '19891.0'}
+        # {'last': 19100.0, 'volume': 8665.12, 'open': 19000.0, 'close': 19999.99, 'volume_traded': 0.459,
+        # 'date': '2017-12-18T10:40:54.866+01:00', 'fund_id': 'BTCUSD', 'high': 19999.99, 'bid': 18900.01,
+        # 'low': 19000.0, 'ask': 19899.0}
 
     def _format_order_book(self, response):
         pass
-
+    
     def _format_trades(self, response):
         pass
 

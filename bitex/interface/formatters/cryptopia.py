@@ -7,20 +7,21 @@ class CryptopiaFormattedResponse(FormattedResponse):
     def _format_ticker(self, response):
         response_data = response.json()
         return {
-            'timestamp': datetime.fromtimestamp(float(response_data['TimeStamp'])),
-            'bid': float(response_data['result']['Bid']),
-            'ask': float(response_data['result']['Ask']),
-            'low': float(response_data['result']['Low']),
-            'high': float(response_data['result']['High']),
-            'volume': float(response_data['result']['BaseVolume']),
-            'last': float(response_data['result']['Last'])
+            'timestamp': response.receive_time,
+            'bid': float(response_data['Data']['BidPrice']),
+            'ask': float(response_data['Data']['AskPrice']),
+            'low': float(response_data['Data']['Low']),
+            'high': float(response_data['Data']['High']),
+            'volume': float(response_data['Data']['Volume']),
+            'last': float(response_data['Data']['LastPrice'])
         }
-        # {'success': True, 'result': [{'Ask': 0.01664998, 'BaseVolume': 2772.17956679, 'MarketName': 'BTC-LTC',
-        #                               'OpenSellOrders': 9647, 'Low': 0.01589002, 'Created': '2014-02-13T00:00:00',
-        #                               'OpenBuyOrders': 7846, 'Bid': 0.01663114, 'PrevDay': 0.01613444,
-        #                               'High': 0.0171071, 'Volume': 168102.39042146,
-        #                               'TimeStamp': '2017-12-18T09:42:47.75',
-        #                               'Last': 0.01663114}], 'message': ''}
+
+        # {'Error': None, 'Message': None, 'Success': True,
+        #  'Data': {'BaseVolume': 115.20140042, 'SellBaseVolume': 7895377.3822143, 'Label': 'ETH/BTC',
+        #           'SellVolume': 610.85063355, 'Close': 0.03827886, 'Change': 4.87, 'LastPrice': 0.03827886,
+        #           'AskPrice': 0.03827886, 'Volume': 3086.02843597, 'Low': 0.03526454, 'BuyVolume': 696183.93492498,
+        #           'BidPrice': 0.03820002, 'High': 0.03899999, 'Open': 0.0365, 'TradePairId': 5203,
+        #           'BuyBaseVolume': 11.94683624}}
 
     def _format_order_book(self, response):
         pass

@@ -3,6 +3,8 @@
 import logging
 
 # Import Homebrew
+from datetime import datetime
+
 from bitex.api.REST.cryptopia import CryptopiaREST
 from bitex.interface.rest import RESTInterface
 from bitex.utils import check_and_format_pair, format_response
@@ -17,6 +19,13 @@ class Cryptopia(RESTInterface):
     def __init__(self, **api_kwargs):
         """Initialize Interface class instance."""
         super(Cryptopia, self).__init__('Cryptopia', CryptopiaREST(**api_kwargs))
+
+    def request(self, verb, endpoint, authenticate=False, **req_kwargs):
+        """Preprocess request to API."""
+        resp = super(Cryptopia, self).request(verb, endpoint, authenticate=authenticate,
+                                              **req_kwargs)
+        resp.receive_time = datetime.now()
+        return resp
 
     def _get_supported_pairs(self):
         r = self.request('GET', 'GetTradePairs').json()

@@ -2,7 +2,7 @@ from bitex.interface.formatters import FormattedResponse
 from datetime import datetime
 
 
-class BitfinexFormattedResponse(FormattedResponse):
+class QuadrigaCXFormattedResponse(FormattedResponse):
 
     def _format_ticker(self, response):
         response_data = response.json()
@@ -13,14 +13,14 @@ class BitfinexFormattedResponse(FormattedResponse):
             'low': float(response_data['low']),
             'high': float(response_data['high']),
             'volume': float(response_data['volume']),
-            'last': float(response_data['last_price'])
+            'last': float(response_data['last'])
         }
-        # {'bid': '18629.0', 'timestamp': '1513589744.5260189', 'ask': '18630.0', 'mid': '18629.5', 'low': '18010.0',
-        #  'volume': '63690.87027664', 'last_price': '18630.0', 'high': '19891.0'}
+        # {'timestamp': '1513590053', 'last': '18664.39', 'high': '19149.99', 'low': '18302.00',
+        # 'vwap': '19398.35646730', 'ask': '19484.79', 'volume': '16.86610461', 'bid': '18664.50'}
 
     def _format_order_book(self, response):
         pass
-
+    
     def _format_trades(self, response):
         pass
 

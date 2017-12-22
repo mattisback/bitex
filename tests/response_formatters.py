@@ -1,4 +1,7 @@
 import unittest
+
+import math
+
 import bitex
 from datetime import datetime
 from unittest.mock import patch, Mock
@@ -110,16 +113,16 @@ class BitfinexFormattingTests(unittest.TestCase):
 class BitstampFormattingTests(unittest.TestCase):
     @patch('requests.request')
     def test_ticker(self, mock_request):
-        mock_request.side_effect = [# MockResponse({'btcusd', 'ltcusd'}, 200),  # supported pairs
-                                    MockResponse({'bid': '18795.00',
-                                                  'open': '18953.00',
-                                                  'timestamp': '1513589738',
-                                                  'ask': '18831.82',
-                                                  'volume': '13558.68696337',
-                                                  'low': '17835.20',
-                                                  'high': '19666.00',
-                                                  'vwap': '18809.34',
-                                                  'last': '18832.93'}, 200)]
+        mock_request.side_effect = [  # MockResponse({'btcusd', 'ltcusd'}, 200),  # supported pairs
+            MockResponse({'bid': '18795.00',
+                          'open': '18953.00',
+                          'timestamp': '1513589738',
+                          'ask': '18831.82',
+                          'volume': '13558.68696337',
+                          'low': '17835.20',
+                          'high': '19666.00',
+                          'vwap': '18809.34',
+                          'last': '18832.93'}, 200)]
 
         formatted_response = bitex.Bitstamp().ticker(bitex.BTCUSD)
 
@@ -168,6 +171,103 @@ class BittrexFormattingTests(unittest.TestCase):
                               'high': 0.01980000,
                               'volume': 6651.09475051,
                               'last': 0.01793009})
+
+
+class CCEXFormattingTests(unittest.TestCase):
+    @patch('requests.request')
+    def test_ticker(self, mock_request):
+        exchange_info_data = json.load(open('example_responses/ccex/pairs.json'))
+        mock_request.side_effect = [MockResponse(exchange_info_data, 200),  # supported pairs
+                                    MockResponse({'ticker': {'updated': 1513591935,
+                                                             'lastbuy': 0.03794999,
+                                                             'buy': 0.03794999,
+                                                             'sell': 0.03798,
+                                                             'buysupport': 7.03034809,
+                                                             'lastprice': 0.03794999,
+                                                             'high': 0.03879995,
+                                                             'low': 0.03600001,
+                                                             'avg': 0.03739998,
+                                                             'lastsell': 0.03794999}}, 200)]
+
+        formatted_response = bitex.CCEX().ticker(bitex.BTCUSD)
+
+        check_ticker_format(formatted_response)
+        self.assertDictContainsSubset(
+            {'timestamp': datetime(2017, 12, 18, 21, 12, 15),
+             'bid': 0.03794999,
+             'ask': 0.03798,
+             'low': 0.03600001,
+             'high': 0.03879995,
+             # 'volume': float('nan'), # checking for nan doesn't work here!
+             'last': 0.03794999}, formatted_response.formatted)
+        self.assertTrue(math.isnan(formatted_response.formatted['volume']))
+
+
+class CoinCheckFormattingTests(unittest.TestCase):
+    @patch('requests.request')
+    def test_ticker(self, mock_request):
+        exchange_info_data = json.load(open('example_responses/ccex/pairs.json'))
+        mock_request.side_effect = [  # MockResponse(exchange_info_data, 200),  # supported pairs
+            MockResponse({"last": 2171460.0,
+                          "bid": 2171460.0,
+                          "ask": 2171871.0,
+                          "high": 2277722.0,
+                          "low": 2000000.0,
+                          "volume": 42302.59403478,
+                          "timestamp": 1513592823}, 200)]
+
+        formatted_response = bitex.CoinCheck().ticker('btc-jpy')
+
+        check_ticker_format(formatted_response)
+        self.assertDictEqual(formatted_response.formatted,
+                             {'timestamp': datetime(2017, 12, 18, 21, 27, 3),
+                              'bid': 2171460.0,
+                              'ask': 2171871.0,
+                              'low': 2000000.0,
+                              'high': 2277722.0,
+                              'volume': 42302.59403478,
+                              'last': 2171460.0})
+
+
+class CryptopiaFormattingTests(unittest.TestCase):
+    @patch('requests.request')
+    def test_ticker(self, mock_request):
+        exchange_info_data = json.load(open('example_responses/cryptopia/GetTradePairs.json'))
+        mock_request.side_effect = [MockResponse(exchange_info_data, 200),  # supported pairs
+                                    MockResponse({'Error': None,
+                                                  'Message': None,
+                                                  'Success': True,
+                                                  'Data': {'BaseVolume': 115.20140042,
+                                                           'SellBaseVolume': 7895377.3822143,
+                                                           'Label': 'ETH/BTC',
+                                                           'SellVolume': 610.85063355,
+                                                           'Close': 0.03827886,
+                                                           'Change': 4.87,
+                                                           'LastPrice': 0.03827886,
+                                                           'AskPrice': 0.03827886,
+                                                           'Volume': 3086.02843597,
+                                                           'Low': 0.03526454,
+                                                           'BuyVolume': 696183.93492498,
+                                                           'BidPrice': 0.03820002,
+                                                           'High': 0.03899999,
+                                                           'Open': 0.0365,
+                                                           'TradePairId': 5203,
+                                                           'BuyBaseVolume': 11.94683624}}, 200)]
+
+        with freeze_time('2017-12-18 20:35:44'):
+            formatted_response = bitex.Cryptopia().ticker('ETH_BTC')
+
+            check_ticker_format(formatted_response)
+            self.assertDictEqual(formatted_response.formatted,
+                                 {
+                                     'timestamp': datetime(2017, 12, 18, 20, 35, 44, 0),
+                                     'bid': 0.03820002,
+                                     'ask': 0.03827886,
+                                     'low': 0.03526454,
+                                     'high': 0.03899999,
+                                     'volume': 3086.02843597,
+                                     'last': 0.03827886
+                                 })
 
 
 class PoloniexFormattingTests(unittest.TestCase):

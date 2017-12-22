@@ -22,7 +22,7 @@ class KrakenFormattedResponse(FormattedResponse):
         Note: Today's prices start at 00:00:00 UTC
         """
         response_data = response.json()
-        d = response_data.values()[0]
+        d = response_data['result'][next(iter(response_data['result']))]
         return {
             'timestamp': response.receive_time,
             'bid': float(d['b'][0]),

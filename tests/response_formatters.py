@@ -300,6 +300,39 @@ class HitBTCFormattingTests(unittest.TestCase):
                              })
 
 
+class KrakenFormattingTests(unittest.TestCase):
+    @patch('requests.request')
+    def test_ticker(self, mock_request):
+        exchange_info_data = json.load(open('example_responses/kraken/AssetPairs.json'))
+        mock_request.side_effect = [MockResponse(exchange_info_data, 200),  # supported pairs
+                                    MockResponse({'result': {
+                                        'XXBTZUSD': {
+                                            'l': ['18298.50000', '18298.50000'],
+                                            't': [10565, 25136],
+                                            'h': ['19248.80000', '19660.00000'],
+                                            'p': ['18621.15863', '18915.79287'],
+                                            'c': ['18730.00000', '0.03250000'],
+                                            'a': ['18736.20000', '1', '1.000'],
+                                            'b': ['18734.00000', '1', '1.000'],
+                                            'o': '18920.60000',
+                                            'v': ['1625.24396735', '3765.20743005']}},
+                                        'error': []}, 200)]
+        with freeze_time('2017-12-18 20:35:44'):
+            formatted_response = bitex.Kraken().ticker(bitex.BTCUSD)
+
+            check_ticker_format(formatted_response)
+            self.assertDictEqual(formatted_response.formatted,
+                                 {
+                                     'timestamp': datetime(2017, 12, 18, 20, 35, 44),
+                                     'bid': 18734.00000,
+                                     'ask': 18736.20000,
+                                     'low': 18298.50000,
+                                     'high': 19248.80000,
+                                     'volume': 1625.24396735,
+                                     'last': 18730.00000
+                                 })
+
+
 class PoloniexFormattingTests(unittest.TestCase):
     @patch('requests.request')
     def test_ticker(self, mock_request):

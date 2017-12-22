@@ -270,6 +270,36 @@ class CryptopiaFormattingTests(unittest.TestCase):
                                  })
 
 
+class HitBTCFormattingTests(unittest.TestCase):
+    @patch('requests.request')
+    def test_ticker(self, mock_request):
+        exchange_info_data = json.load(open('example_responses/hitbtc/symbols.json'))
+        mock_request.side_effect = [MockResponse(exchange_info_data, 200),  # supported pairs
+                                    MockResponse({'volume_quote': '83133956.8778',
+                                                  'low': '17900.00',
+                                                  'timestamp': 1513589950091,
+                                                  'last': '18541.17',
+                                                  'ask': '18541.13',
+                                                  'open': '19222.49',
+                                                  'bid': '18520.03',
+                                                  'volume': '4407.55',
+                                                  'high': '19531.90'}, 200)]
+
+        formatted_response = bitex.HitBTC().ticker(bitex.BTCUSD)
+
+        check_ticker_format(formatted_response)
+        self.assertDictEqual(formatted_response.formatted,
+                             {
+                                 'timestamp': datetime(2017, 12, 18, 20, 39, 10, 91000),
+                                 'bid': 18520.03,
+                                 'ask': 18541.13,
+                                 'low': 17900.00,
+                                 'high': 19531.90,
+                                 'volume': 4407.55,
+                                 'last': 18541.17
+                             })
+
+
 class PoloniexFormattingTests(unittest.TestCase):
     @patch('requests.request')
     def test_ticker(self, mock_request):

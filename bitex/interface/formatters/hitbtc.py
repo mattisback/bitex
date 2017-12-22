@@ -7,7 +7,7 @@ class HitBTCFormattedResponse(FormattedResponse):
     def _format_ticker(self, response):
         response_data = response.json()
         return {
-            'timestamp': datetime.fromtimestamp(float(response_data['timestamp'])),
+            'timestamp': datetime.fromtimestamp(float(response_data['timestamp'])/1000),
             'bid': float(response_data['bid']),
             'ask': float(response_data['ask']),
             'low': float(response_data['low']),

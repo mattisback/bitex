@@ -36,11 +36,14 @@ jobs:
       python: 3.5
       script: python setup.py install
     - stage: deploy
+      python: 3.5
       script: ./travis/deploy.sh
 
 stages:
-  - lint
+  - name: lint
+    if: branch != nightly
   - compile
-  - test
+  - name: test
+    if: branch != nightly
   - name: deploy
     if: tag IS present OR branch = nightly

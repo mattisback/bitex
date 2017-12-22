@@ -8,7 +8,8 @@ import requests
 # Import Homebrew
 from bitex.api.REST.bitfinex import BitfinexREST
 from bitex.interface.rest import RESTInterface
-from bitex.utils import check_version_compatibility, check_and_format_pair
+from bitex.interface.formatters import BitfinexFormattedResponse
+from bitex.utils import check_version_compatibility, check_and_format_pair, format_response
 
 # Init Logging Facilities
 log = logging.getLogger(__name__)
@@ -55,12 +56,15 @@ class Bitfinex(RESTInterface):
     def _get_supported_pairs(self):
         """Return supported pairs."""
         if self.REST.version == 'v1':
-            return self.symbols().json()
-        return requests.get('https://api.bitfinex.com/v1/symbols').json()
+            pairs = self.symbols().json()
+        else:
+            pairs = requests.get('https://api.bitfinex.com/v1/symbols').json()
+        return [p.upper() for p in pairs]
 
     ###############
     # Basic Methods
     ###############
+    @format_response
     @check_and_format_pair
     def ticker(self, pair, **endpoint_kwargs):
         """Return the ticker for a given pair."""
@@ -425,3 +429,4 @@ class Bitfinex(RESTInterface):
         self.is_supported(pair)
         endpoint_kwargs['symbol'] = pair
         return self.request('auth/calc/order/avail', authenticate=True, params=endpoint_kwargs)
+

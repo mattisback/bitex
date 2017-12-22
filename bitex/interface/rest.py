@@ -2,6 +2,7 @@
 # Import Built-Ins
 import logging
 import abc
+import requests
 
 # Import Homebrew
 from bitex.utils import check_and_format_pair

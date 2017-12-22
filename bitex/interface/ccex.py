@@ -8,7 +8,7 @@ import requests
 # Import Homebrew
 from bitex.api.REST.ccex import CCEXREST
 from bitex.interface.rest import RESTInterface
-from bitex.utils import check_and_format_pair
+from bitex.utils import check_and_format_pair, format_response
 
 # Init Logging Facilities
 log = logging.getLogger(__name__)
@@ -35,6 +35,7 @@ class CCEX(RESTInterface):
         return requests.get('https://c-cex.com/t/pairs.json').json()['pairs']
 
     # Public Endpoints
+    @format_response
     @check_and_format_pair
     def ticker(self, pair, *args, **kwargs):
         """Return the ticker for the given pair."""

@@ -5,7 +5,8 @@ import logging
 # Import Homebrew
 from bitex.api.REST.kraken import KrakenREST
 from bitex.interface.rest import RESTInterface
-from bitex.utils import check_and_format_pair
+from bitex.utils import check_and_format_pair, format_response
+from datetime import datetime
 
 # Init Logging Facilities
 log = logging.getLogger(__name__)
@@ -27,12 +28,16 @@ class Kraken(RESTInterface):
     def request(self, endpoint, authenticate=False, **req_kwargs):
         """Generate a request to the API."""
         if authenticate:
-            return super(Kraken, self).request('POST', 'private/' + endpoint,
+            resp = super(Kraken, self).request('POST', 'private/' + endpoint,
                                                authenticate=True, **req_kwargs)
-        return super(Kraken, self).request('GET', 'public/' + endpoint, **req_kwargs)
+        else:
+            resp = super(Kraken, self).request('GET', 'public/' + endpoint, **req_kwargs)
+        resp.receive_time = datetime.now()
+        return resp
 
     # Public Endpoints
     # pylint: disable=arguments-differ
+    @format_response
     @check_and_format_pair
     def ticker(self, *pairs, **kwargs):
         """Return the ticker for the given pair."""

@@ -1,11 +1,13 @@
 """Supplies Decorators and utility functions."""
 # Import Built-ins
 import os
+import sys
 import configparser
 from functools import wraps
 # Import Homebrew
 from bitex.exceptions import UnsupportedEndpointError
 from bitex.pairs import PairFormatter
+from bitex.interface.formatters import *
 
 
 def check_version_compatibility(**version_func_pairs):
@@ -59,6 +61,29 @@ def check_and_format_pair(func):
         if pair not in self._supported_pairs:
             raise AssertionError("%s is not supported by this exchange!" % pair)
         return func(self, *args, **kwargs)
+    return wrapped
+
+
+def format_response(func):
+    """Formats a requests.Response object, wrapping it in a FormattedResponse object
+    :param func     the function being called (eg. ticker or order_book)
+    """
+    @wraps(func)
+    def wrapped(self, *args, **kwargs):
+        """Wrap function."""
+        try:
+            class_name = self.__class__.__name__
+            formatter_name = class_name + "FormattedResponse"
+            formatter_class = getattr(sys.modules['bitex.interface.formatters'], formatter_name)
+            # formatter = globals()[formatter_name]  # alternative to above
+        except AttributeError:
+            raise NotImplementedError('Formatter \'' + formatter_name + '\' does not exist')
+
+        # run the function
+        response = func(self, *args, **kwargs)
+
+        return formatter_class(func.__name__, args, response)
+
     return wrapped
 
 

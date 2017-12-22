@@ -5,7 +5,7 @@ import logging
 # Import Homebrew
 from bitex.api.REST.rocktrading import RockTradingREST
 from bitex.interface.rest import RESTInterface
-from bitex.utils import check_and_format_pair
+from bitex.utils import check_and_format_pair, format_response
 
 # Init Logging Facilities
 log = logging.getLogger(__name__)
@@ -23,6 +23,7 @@ class TheRockTrading(RESTInterface):
         return [d['id'] for d in self.request('GET', 'funds').json()['funds']]
 
     # Public Endpoints
+    @format_response
     @check_and_format_pair
     def ticker(self, pair, *args, **kwargs):
         """Return the ticker for the given pair."""

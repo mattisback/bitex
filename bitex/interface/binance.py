@@ -8,7 +8,8 @@ import requests
 # Import Homebrew
 from bitex.api.REST.binance import BinanceREST
 from bitex.interface.rest import RESTInterface
-from bitex.utils import check_version_compatibility, check_and_format_pair
+from bitex.utils import check_version_compatibility, check_and_format_pair, format_response
+from datetime import datetime
 
 # Init Logging Facilities
 log = logging.getLogger(__name__)
@@ -23,19 +24,21 @@ class Binance(RESTInterface):
 
     # pylint: disable=arguments-differ
 
-
     def __init__(self, **api_kwargs):
         """Initialize class instance."""
         super(Binance, self).__init__('Binance', BinanceREST(**api_kwargs))
 
     def request(self, verb, endpoint, authenticate=False, **req_kwargs):
         """Preprocess request to API."""
-        return super(Binance, self).request(verb, endpoint, authenticate=authenticate,
-                                             **req_kwargs)
+        resp = super(Binance, self).request(verb, endpoint, authenticate=authenticate,
+                                            **req_kwargs)
+        resp.receive_time = datetime.now()
+        return resp
 
     def _get_supported_pairs(self):
         """
         Generate a list of supported pairs.
+        TODO: sync server time r['timezone'] and r['serverTime'] because it's not included in other api calls
         """
         r = self.request('GET', 'v1/exchangeInfo').json()
         pairs = [entry['symbol'] for entry in r['symbols']]
@@ -44,6 +47,7 @@ class Binance(RESTInterface):
     def is_supported(self, pair):
         return super(Binance, self).is_supported(pair)
 
+    @format_response
     def ticker(self, pair, *args, **kwargs):
         """
         Return the ticker for the given pair.

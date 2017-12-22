@@ -5,7 +5,8 @@ import logging
 # Import Homebrew
 from bitex.api.REST.poloniex import PoloniexREST
 from bitex.interface.rest import RESTInterface
-from bitex.utils import check_and_format_pair
+from bitex.utils import check_and_format_pair, format_response
+from datetime import datetime
 
 # Init Logging Facilities
 log = logging.getLogger(__name__)
@@ -26,15 +27,21 @@ class Poloniex(RESTInterface):
         else:
             req_kwargs['params'] = {'command': endpoint}
         if authenticate:
-            return super(Poloniex, self).request('POST', endpoint, authenticate,
+            resp = super(Poloniex, self).request('POST', endpoint, authenticate,
                                                  **req_kwargs)
-        return super(Poloniex, self).request('GET', 'public', authenticate,
-                                             **req_kwargs)
+        else:
+            resp = super(Poloniex, self).request('GET', 'public', authenticate,
+                                                 **req_kwargs)
+
+        resp.receive_time = datetime.now()
+        return resp
 
     def _get_supported_pairs(self):
-        return ['BTC_ETH']
+        r = self.request('returnTicker').json()
+        return [key for key in r]
 
     # Public Endpoints
+    @format_response
     @check_and_format_pair
     def ticker(self, pair, *args, **kwargs):
         """Return the ticker for the given pair."""

@@ -136,6 +136,40 @@ class BitstampFormattingTests(unittest.TestCase):
                              })
 
 
+class BittrexFormattingTests(unittest.TestCase):
+    @patch('requests.request')
+    def test_ticker(self, mock_request):
+        exchange_info_data = json.load(open('example_responses/bittrex/api_v1.1_public_getmarkets.txt'))
+        mock_request.side_effect = [MockResponse(exchange_info_data, 200),  # supported pairs
+                                    MockResponse({"success": True,
+                                                  "message": "",
+                                                  "result": [{"MarketName": "BTC-LTC",
+                                                              "High": 0.01980000,
+                                                              "Low": 0.01710000,
+                                                              "Volume": 351275.48627484,
+                                                              "Last": 0.01793009,
+                                                              "BaseVolume": 6651.09475051,
+                                                              "TimeStamp": "2017-12-22T12:01:51.87",
+                                                              "Bid": 0.01793502,
+                                                              "Ask": 0.01804016,
+                                                              "OpenBuyOrders": 4055,
+                                                              "OpenSellOrders": 6906,
+                                                              "PrevDay": 0.01889867,
+                                                              "Created": "2014-02-13T00:00:00"}]}, 200)]
+
+        formatted_response = bitex.Bittrex().ticker('BTC-LTC')
+
+        check_ticker_format(formatted_response)
+        self.assertDictEqual(formatted_response.formatted,
+                             {'timestamp': datetime(2017, 12, 22, 12, 1, 51, 870000),
+                              'bid': 0.01793502,
+                              'ask': 0.01804016,
+                              'low': 0.01710000,
+                              'high': 0.01980000,
+                              'volume': 6651.09475051,
+                              'last': 0.01793009})
+
+
 class PoloniexFormattingTests(unittest.TestCase):
     @patch('requests.request')
     def test_ticker(self, mock_request):

@@ -7,13 +7,13 @@ class BittrexFormattedResponse(FormattedResponse):
     def _format_ticker(self, response):
         response_data = response.json()
         return {
-            'timestamp': datetime.fromtimestamp(float(response_data['TimeStamp'])),
-            'bid': float(response_data['result']['Bid']),
-            'ask': float(response_data['result']['Ask']),
-            'low': float(response_data['result']['Low']),
-            'high': float(response_data['result']['High']),
-            'volume': float(response_data['result']['BaseVolume']),
-            'last': float(response_data['result']['Last'])
+            'timestamp': datetime.strptime(response_data['result'][0]['TimeStamp'], '%Y-%m-%dT%H:%M:%S.%f'),
+            'bid': float(response_data['result'][0]['Bid']),
+            'ask': float(response_data['result'][0]['Ask']),
+            'low': float(response_data['result'][0]['Low']),
+            'high': float(response_data['result'][0]['High']),
+            'volume': float(response_data['result'][0]['BaseVolume']),
+            'last': float(response_data['result'][0]['Last'])
         }
         # {'success': True, 'result': [{'Ask': 0.01664998, 'BaseVolume': 2772.17956679, 'MarketName': 'BTC-LTC',
         #                               'OpenSellOrders': 9647, 'Low': 0.01589002, 'Created': '2014-02-13T00:00:00',

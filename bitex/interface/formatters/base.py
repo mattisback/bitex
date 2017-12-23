@@ -10,15 +10,9 @@ class APIResponse(requests.Response):
                               (self.__class__, response.__class__),
                               {})
         self.__dict__ = response.__dict__
-        # super(APIResponse, self).__init__()
         self.called_method = method  # need to know the type of method so we know how to format it, just a string
         self.called_method_params = params  # do we need this?
         self.response = response  # could be called response instead of raw
-
-    # def __getattr__(self, attr):
-    #     if attr in self.__dict__:
-    #         return getattr(self, attr)
-    #     return getattr(self.response, attr)
 
     @property
     def formatted(self):

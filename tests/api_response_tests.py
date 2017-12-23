@@ -16,24 +16,30 @@ except ImportError:
 log = logging.getLogger(__name__)
 
 
+def buld_mock_response():
+    """Build a mock response object with all necessary parameters mocked"""
+    response = mock.MagicMock(spec=requests.Response)
+    response.content = bytes()
+    response.status_code = 200
+    response.cookies = []
+    response.elapsed = 0
+    response.encoding = 'utf8'
+    response.headers = {'link': ''}
+    response.history = []
+    response.next = None
+    response.raw = None
+    response.reason = None
+    response.request = None
+    response.url = ''
+    response._content_consumed = ''
+    response._content = bytes()
+    return response
+
+
 class APIResponseTests(unittest.TestCase):
 
     def test_class_instance_handles_like_requestsResponse_instance(self):
-        response = mock.MagicMock(spec=requests.Response)
-        response.content = bytes()
-        response.status_code = 200
-        response.cookies = []
-        response.elapsed = 0
-        response.encoding = 'utf8'
-        response.headers = {'link': ''}
-        response.history = []
-        response.next = None
-        response.raw = None
-        response.reason = None
-        response.request = None
-        response.url = ''
-        response._content_consumed = ''
-        response._content = bytes()
+        response = buld_mock_response()
         api_response = APIResponse('', {}, response)
 
         # Assert all expected attributes are present on the proxy object

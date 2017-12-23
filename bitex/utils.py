@@ -49,7 +49,6 @@ def check_and_format_pair(func):
     """
     @wraps(func)
     def wrapped(self, *args, **kwargs):
-        """Wrap function."""
         pair, *_ = args
         try:
             if isinstance(args[0], PairFormatter):
@@ -70,18 +69,18 @@ def format_response(func):
     """
     @wraps(func)
     def wrapped(self, *args, **kwargs):
-        """Wrap function."""
         try:
             class_name = self.__class__.__name__
             formatter_name = class_name + "APIResponse"
             formatter_class = getattr(sys.modules['bitex.interface.formatters'], formatter_name)
             # formatter = globals()[formatter_name]  # alternative to above
         except AttributeError:
-            raise NotImplementedError('Formatter \'' + formatter_name + '\' does not exist')
+            raise NotImplementedError("Formatter '" + formatter_name + "' does not exist")
 
         # run the function
         response = func(self, *args, **kwargs)
 
+        # wrap the response in the formatter class
         return formatter_class(func.__name__, args, response)
 
     return wrapped

@@ -8,7 +8,7 @@ import requests
 # Import Homebrew
 from bitex.api.REST.bitfinex import BitfinexREST
 from bitex.interface.rest import RESTInterface
-from bitex.interface.formatters import BitfinexFormattedResponse
+from bitex.interface.formatters import BitfinexAPIResponse
 from bitex.utils import check_version_compatibility, check_and_format_pair, format_response
 
 # Init Logging Facilities

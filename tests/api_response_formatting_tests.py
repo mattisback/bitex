@@ -12,7 +12,7 @@ from freezegun import freeze_time
 
 class MockResponse(requests.Response):
     def __init__(self, json_data, status_code):
-        super().__init__()
+        # super().__init__()
         self.json_data = json_data
         self.status_code = status_code
 

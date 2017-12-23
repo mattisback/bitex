@@ -1,8 +1,8 @@
-from bitex.interface.formatters import FormattedResponse
+from bitex.interface.formatters import APIResponse
 from datetime import datetime
 
 
-class KrakenFormattedResponse(FormattedResponse):
+class KrakenAPIResponse(APIResponse):
 
     def _format_ticker(self, response):
         """

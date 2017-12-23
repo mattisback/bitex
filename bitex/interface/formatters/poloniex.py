@@ -1,12 +1,12 @@
-from bitex.interface.formatters import FormattedResponse
+from bitex.interface.formatters import APIResponse
 from datetime import datetime
 
 
-class PoloniexFormattedResponse(FormattedResponse):
+class PoloniexAPIResponse(APIResponse):
 
     def _format_ticker(self, response):
         response_data = response.json()
-        d = response_data[self.method_params[0]]
+        d = response_data[self.called_method_params[0]]
         return {
             'timestamp': response.receive_time,
             'bid': float(d['highestBid']),

@@ -73,7 +73,7 @@ def format_response(func):
         """Wrap function."""
         try:
             class_name = self.__class__.__name__
-            formatter_name = class_name + "FormattedResponse"
+            formatter_name = class_name + "APIResponse"
             formatter_class = getattr(sys.modules['bitex.interface.formatters'], formatter_name)
             # formatter = globals()[formatter_name]  # alternative to above
         except AttributeError:

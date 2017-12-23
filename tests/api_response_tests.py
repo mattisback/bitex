@@ -8,7 +8,7 @@ import requests
 
 # Import Homebrew
 try:
-    from bitex.interface.rest import APIResponse
+    from bitex.interface.formatters import APIResponse
 except ImportError:
     raise AssertionError("'APIResponse' not implemented!")
 
@@ -20,13 +20,27 @@ class APIResponseTests(unittest.TestCase):
 
     def test_class_instance_handles_like_requestsResponse_instance(self):
         response = mock.MagicMock(spec=requests.Response)
-        api_response = APIResponse(response)
+        response.content = bytes()
+        response.status_code = 200
+        response.cookies = []
+        response.elapsed = 0
+        response.encoding = 'utf8'
+        response.headers = {'link': ''}
+        response.history = []
+        response.next = None
+        response.raw = None
+        response.reason = None
+        response.request = None
+        response.url = ''
+        response._content_consumed = ''
+        response._content = bytes()
+        api_response = APIResponse('', {}, response)
 
-        # Assert all expected attributes are present
+        # Assert all expected attributes are present on the proxy object
         expected_attributes = ['apparent_encoding', 'content', 'cookies', 'elapsed', 'encoding',
                                'headers', 'history', 'is_permanent_redirect', 'is_redirect',
-                               'links', 'next', 'ok', 'raw', 'reason', 'request', 'status_code',
-                               'text', 'url', 'response']
+                               'links', 'next', 'ok', 'raw', 'reason', 'request',  'status_code',
+                               'text', 'url', 'response', 'json']
         for attr in expected_attributes:
             self.assertTrue(hasattr(api_response, attr),
                             msg="%s has no attribute '%s'" % (api_response, attr))
@@ -54,34 +68,33 @@ class APIResponseTests(unittest.TestCase):
 
     def test_formatter_methods_raise_NotImplementedError_for_base_class(self):
         response = mock.MagicMock(spec=requests.Response)
-        api_response = APIResponse(response)
+        api_response = APIResponse('', {}, response)
         with self.assertRaises(NotImplementedError):
-            api_response.ticker(None)
+            api_response._format_ticker(None)
 
         with self.assertRaises(NotImplementedError):
-            api_response.order_book(None)
+            api_response._format_order_book(None)
 
         with self.assertRaises(NotImplementedError):
-            api_response.trades(None)
+            api_response._format_trades(None)
 
         with self.assertRaises(NotImplementedError):
-            api_response.bid(1, 2, 3)
+            api_response._format_bid(None)
 
         with self.assertRaises(NotImplementedError):
-            api_response.ask(1, 2, 3)
+            api_response._format_ask(None)
 
         with self.assertRaises(NotImplementedError):
-            api_response.order_status(None)
+            api_response._format_order_status(None)
 
         with self.assertRaises(NotImplementedError):
-            api_response.open_orders(None)
+            api_response._format_open_orders(None)
 
         with self.assertRaises(NotImplementedError):
-            api_response.cancel_order(None)
+            api_response._format_cancel_order(None)
 
         with self.assertRaises(NotImplementedError):
-            api_response.wallet(None)
-
+            api_response._format_wallet(None)
 
 
 if __name__ == '__main__':

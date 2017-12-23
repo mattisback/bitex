@@ -1,8 +1,8 @@
-from bitex.interface.formatters import FormattedResponse
+from bitex.interface.formatters import APIResponse
 from datetime import datetime
 
 
-class BinanceFormattedResponse(FormattedResponse):
+class BinanceAPIResponse(APIResponse):
 
     def _format_ticker(self, response):
         response_data = response.json()

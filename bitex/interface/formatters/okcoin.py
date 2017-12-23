@@ -2,7 +2,7 @@ from bitex.interface.formatters import APIResponse
 from datetime import datetime
 
 
-class OkCoinAPIResponse(APIResponse):
+class OKCoinAPIResponse(APIResponse):
 
     def _format_ticker(self, response):
         response_data = response.json()

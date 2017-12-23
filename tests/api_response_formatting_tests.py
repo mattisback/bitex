@@ -3,7 +3,7 @@ import unittest
 import math
 
 import bitex
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from unittest.mock import patch, Mock
 import requests
 import json
@@ -333,6 +333,34 @@ class KrakenFormattingTests(unittest.TestCase):
                                  })
 
 
+class OKCoinFormattingTests(unittest.TestCase):
+    @patch('requests.request')
+    def test_ticker(self, mock_request):
+        # exchange_info_data = json.load(open('example_responses/hitbtc/symbols.json'))
+        mock_request.side_effect = [  # MockResponse(exchange_info_data, 200),  # supported pairs
+                                    MockResponse({'date': '1513589963',
+                                                  'ticker': {'vol': '242.63',
+                                                             'sell': '19304.32',
+                                                             'low': '18463.31',
+                                                             'buy': '19250.00',
+                                                             'last': '19305.32',
+                                                             'high': '20312.39'}}, 200)]
+
+        formatted_response = bitex.OKCoin().ticker(bitex.BTCUSD)
+
+        check_ticker_format(formatted_response)
+        self.assertDictEqual(formatted_response.formatted,
+                             {
+                                 'timestamp': datetime(2017, 12, 18, 20, 39, 23),
+                                 'bid': 19250.00,
+                                 'ask': 19304.32,
+                                 'low': 18463.31,
+                                 'high': 20312.39,
+                                 'volume': 242.63,
+                                 'last': 19305.32
+                             })
+
+
 class PoloniexFormattingTests(unittest.TestCase):
     @patch('requests.request')
     def test_ticker(self, mock_request):
@@ -353,6 +381,66 @@ class PoloniexFormattingTests(unittest.TestCase):
                                  'high': 17375.98798753,
                                  'volume': 243864092.21685281,
                                  'last': 13730.00000013
+                             })
+
+
+class QuadrigaFormattingTests(unittest.TestCase):
+    @patch('requests.request')
+    def test_ticker(self, mock_request):
+        mock_request.side_effect = [  # MockResponse(exchange_info_data, 200),  # supported pairs
+            MockResponse({'timestamp': '1513590053',
+                          'last': '18664.39',
+                          'high': '19149.99',
+                          'low': '18302.00',
+                          'vwap': '19398.35646730',
+                          'ask': '19484.79',
+                          'volume': '16.86610461',
+                          'bid': '18664.50'}, 200)]
+
+        formatted_response = bitex.QuadrigaCX().ticker(bitex.BTCUSD)
+
+        check_ticker_format(formatted_response)
+        self.assertDictEqual(formatted_response.formatted,
+                             {
+                                 'timestamp': datetime(2017, 12, 18, 20, 40, 53),
+                                 'bid': 18664.50,
+                                 'ask': 19484.79,
+                                 'low': 18302.00,
+                                 'high': 19149.99,
+                                 'volume': 16.86610461,
+                                 'last': 18664.39
+                             })
+
+
+class TheRockTradingFormattingTests(unittest.TestCase):
+    @patch('requests.request')
+    def test_ticker(self, mock_request):
+        exchange_info_data = json.load(open('example_responses/rocktrading/funds.json'))
+        mock_request.side_effect = [MockResponse(exchange_info_data, 200),  # supported pairs
+            MockResponse({'last': 19100.0,
+                          'volume': 8665.12,
+                          'open': 19000.0,
+                          'close': 19999.99,
+                          'volume_traded': 0.459,
+                          'date': '2017-12-18T10:40:54.866+01:00',
+                          'fund_id': 'BTCUSD',
+                          'high': 19999.99,
+                          'bid': 18900.01,
+                          'low': 19000.0,
+                          'ask': 19899.0}, 200)]
+
+        formatted_response = bitex.TheRockTrading().ticker(bitex.BTCUSD)
+
+        check_ticker_format(formatted_response)
+        self.assertDictEqual(formatted_response.formatted,
+                             {
+                                 'timestamp': datetime(2017, 12, 18, 10, 40, 54, 866000, tzinfo=timezone(timedelta(0, 3600))),
+                                 'bid': 18900.01,
+                                 'ask': 19899.0,
+                                 'low': 19000.0,
+                                 'high': 19999.99,
+                                 'volume': 0.459,
+                                 'last': 19100.0
                              })
 
 

@@ -10,5 +10,5 @@ from bitex.interface.formatters.coincheck import CoinCheckAPIResponse
 from bitex.interface.formatters.cryptopia import CryptopiaAPIResponse
 from bitex.interface.formatters.hitbtc import HitBTCAPIResponse
 from bitex.interface.formatters.kraken import KrakenAPIResponse
-from bitex.interface.formatters.okcoin import OkCoinAPIResponse
+from bitex.interface.formatters.okcoin import OKCoinAPIResponse
 from bitex.interface.formatters.poloniex import PoloniexAPIResponse

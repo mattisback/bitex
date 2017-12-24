@@ -35,6 +35,7 @@ class PairTests(unittest.TestCase):
         self.assertEqual(pair.format_for('HitBTC'), 'BTCUSD')
         self.assertEqual(pair.format_for('Vaultoro'), 'BTC-USD')
         self.assertEqual(pair.format_for('Bter'), 'btc_usd')
+        self.assertEqual(pair.format_for('IndependentReserve'), ('Xbt', 'Usd'))
 
         # Assert that calling the formatter returns the standard presentation
         self.assertEqual(str(pair), 'BTCUSD')
@@ -69,6 +70,7 @@ class PairTests(unittest.TestCase):
     def test_kraken_formatter_edge_case(self):
         pair = PairFormatter('BCH', 'EUR')
         self.assertEqual(pair.format_for('Kraken'), 'BCHEUR')
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

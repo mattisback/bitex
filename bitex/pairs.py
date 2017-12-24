@@ -61,7 +61,8 @@ class PairFormatter:
                            'Vaultoro':              self.vaultoro_formatter,
                            'Bter':                  self.bter_formatter,
                            'Yunbi':                 self.yunbi_formatter,
-                           "Binance":               self.binance_formatter}
+                           "Binance":               self.binance_formatter,
+                           "IndependentReserve":    self.independent_reserve_formatter}
 
     def __str__(self, *args, **kwargs):
         """Return the stored base and quote currency in proper pair format."""
@@ -210,6 +211,12 @@ class PairFormatter:
     def bter_formatter(base, quote):
         """Format currencies for BTer."""
         return base.lower() + '_' + quote.lower()
+
+    @staticmethod
+    def independent_reserve_formatter(base, quote):
+        """Format currencies for Independent Reserve"""
+        base = 'XBT' if base == 'BTC' else base
+        return base.title(), quote.title()
 
 
 class BTCUSDFormatter(PairFormatter):

@@ -8,6 +8,7 @@ from bitex.interface.ccex import CCEX
 from bitex.interface.coincheck import CoinCheck
 from bitex.interface.cryptopia import Cryptopia
 from bitex.interface.hitbtc import HitBTC
+from bitex.interface.independentreserve import IndependentReserve
 from bitex.interface.kraken import Kraken
 from bitex.interface.okcoin import OKCoin
 from bitex.interface.poloniex import Poloniex

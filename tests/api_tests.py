@@ -23,6 +23,7 @@ from bitex.api.REST import HitBTCREST, CCEXREST, CoincheckREST, CryptopiaREST
 from bitex.api.REST import ITbitREST, GDAXREST, GeminiREST,  KrakenREST, OKCoinREST
 from bitex.api.REST import PoloniexREST, QuoineREST, QuadrigaCXREST, RockTradingREST
 from bitex.api.REST import VaultoroREST, YunbiREST, BterREST
+from bitex.api.REST import IndependentReserveREST
 from bitex.exceptions import IncompleteCredentialsWarning
 from bitex.exceptions import IncompleteCredentialsError
 from bitex.exceptions import IncompleteAPIConfigurationWarning
@@ -445,6 +446,45 @@ class GDAXRESTTest(TestCase):
 
         self.assertEqual(response.status_code, 200, msg=response.status_code)
         self.assertIn('id', response.json()[0], msg=response.json())
+
+
+class IndependentReserveTest(TestCase):
+    def test_initialization(self):
+        # test that all default values are assigned correctly if No kwargs are
+        # given
+        api = IndependentReserveREST()
+        self.assertIs(api.secret, None)
+        self.assertIs(api.key, None)
+        self.assertEqual(api.addr, 'https://api.independentreserve.com')
+        self.assertEqual(api.version, None)
+        self.assertIs(api.config_file, None)
+
+    def test_sign_request_kwargs_method_and_signature(self):
+        # Test that the sign_request_kwargs generate appropriate kwargs:
+        key, secret = 'panda', 'shadow'
+        with mock.patch.object(RESTAPI, 'nonce', return_value=str(100)):
+            api = BitfinexREST(key=key, secret=secret)
+            self.assertEqual(api.nonce(), str(100))
+            self.assertEqual(api.version, 'v1')
+            self.assertEqual(api.generate_uri('testing/signature'), '/v1/testing/signature')
+            ret_values = api.sign_request_kwargs('testing/signature', params={'param_1': 'abc'})
+            possible_json_dumps = ['{"param_1": "abc", "nonce": "100", "request": "/v1/testing/signature"}',
+                                   '{"param_1": "abc", "request": "/v1/testing/signature", "nonce": "100"}',
+                                   '{"nonce": "100", "param_1": "abc", "request": "/v1/testing/signature"}',
+                                   '{"nonce": "100", "request": "/v1/testing/signature", "param_1": "abc"}',
+                                   '{"request": "/v1/testing/signature", "param_1": "abc", "nonce": "100"}',
+                                   '{"request": "/v1/testing/signature", "nonce": "100", "param_1": "abc"}']
+            data = [base64.standard_b64encode(pl.encode('utf8'))
+                    for pl in possible_json_dumps]
+            signatures = [hmac.new(secret.encode('utf-8'), d, hashlib.sha384).hexdigest()
+                          for d in data]
+
+            self.assertIn('X-BFX-APIKEY', ret_values['headers'])
+            self.assertEqual(ret_values['headers']['X-BFX-APIKEY'], key)
+            self.assertIn('X-BFX-PAYLOAD', ret_values['headers'])
+            self.assertIn(ret_values['headers']['X-BFX-PAYLOAD'], data)
+            self.assertIn('X-BFX-SIGNATURE', ret_values['headers'])
+            self.assertIn(ret_values['headers']['X-BFX-SIGNATURE'], signatures)
 
 
 class KrakenRESTTest(TestCase):

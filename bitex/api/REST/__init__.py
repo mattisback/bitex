@@ -11,6 +11,7 @@ from bitex.api.REST.cryptopia import CryptopiaREST
 from bitex.api.REST.gdax import GDAXREST
 from bitex.api.REST.gemini import GeminiREST
 from bitex.api.REST.hitbtc import HitBTCREST
+from bitex.api.REST.independentreserve import IndependentReserveREST
 from bitex.api.REST.itbit import ITbitREST
 from bitex.api.REST.kraken import KrakenREST
 from bitex.api.REST.okcoin import OKCoinREST

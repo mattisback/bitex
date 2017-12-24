@@ -300,6 +300,38 @@ class HitBTCFormattingTests(unittest.TestCase):
                              })
 
 
+class IndependentReserveFormattingTests(unittest.TestCase):
+    @patch('requests.request')
+    def test_ticker(self, mock_request):
+        mock_request.side_effect = [MockResponse(['Xbt', 'Eth', 'Bch'], 200),  # supported pairs
+                                    MockResponse(['Usd', 'Aud', 'Nzd'], 200),
+                                    MockResponse({"CreatedTimestampUtc": "2014-08-05T06:42:11.3032208Z",
+                                                  "CurrentHighestBidPrice": 500.00000000,
+                                                  "CurrentLowestOfferPrice": 1001.00000000,
+                                                  "DayAvgPrice": 510.000000,
+                                                  "DayHighestPrice": 510.00000000,
+                                                  "DayLowestPrice": 510.00000000,
+                                                  "DayVolumeXbt": 1.00000000,
+                                                  "DayVolumeXbtInSecondaryCurrrency": 0.75000000,
+                                                  "LastPrice": 510.00000000,
+                                                  "PrimaryCurrencyCode": "Xbt",
+                                                  "SecondaryCurrencyCode": "Usd"}, 200)]
+
+        formatted_response = bitex.IndependentReserve().ticker(bitex.BTCUSD)
+
+        check_ticker_format(formatted_response)
+        self.assertDictEqual(formatted_response.formatted,
+                             {
+                                 'timestamp': datetime(2014, 8, 5, 6, 42, 11, 303220),
+                                 'bid': 500.0,
+                                 'ask': 1001,
+                                 'low': 510.0,
+                                 'high': 510.0,
+                                 'volume': 1,
+                                 'last': 510.0
+                             })
+
+
 class KrakenFormattingTests(unittest.TestCase):
     @patch('requests.request')
     def test_ticker(self, mock_request):

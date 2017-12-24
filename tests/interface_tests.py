@@ -14,7 +14,7 @@ from bitex.pairs import PairFormatter
 from bitex.interface.base import Interface
 from bitex.interface.rest import RESTInterface
 from bitex.interface import Bitfinex, Bitstamp, Bittrex, Bter, CCEX
-from bitex.interface import CoinCheck, Cryptopia, HitBTC, Kraken, OKCoin
+from bitex.interface import CoinCheck, Cryptopia, HitBTC, IndependentReserve, Kraken, OKCoin
 from bitex.interface import Poloniex, QuadrigaCX, TheRockTrading, Vaultoro
 from bitex.exceptions import UnsupportedEndpointError
 
@@ -994,6 +994,73 @@ class VaultoroInterfaceTests(unittest.TestCase):
         self.assertEqual(resp.status_code, 200, msg=(resp.text, resp.request.url))
         self.assertEqual(resp.json()['status'], 'success', msg=(resp.text, resp.request.url))
         self.assertIn('data', resp.json())
+
+
+class IndependentReserveInterfaceTests(unittest.TestCase):
+    def tearDown(self):
+        # Wait one second to reduce load on API
+        time.sleep(1)
+
+    # PUBLIC ENDPOINT TESTS
+    def test_and_validate_data_for_ticker_endpoint_method_working_correctly(self):
+        api = IndependentReserve()
+        resp = api.ticker(BTCUSD)
+        self.assertEqual(resp.status_code, 200, msg=resp.text)
+        # self.assertTrue(resp.json()['result'])
+        # Assert that data is in expected format
+        for k in ["CreatedTimestampUtc", "CurrentHighestBidPrice", "CurrentLowestOfferPrice", "DayAvgPrice",
+                  "DayHighestPrice", "DayLowestPrice", "DayVolumeXbt", "DayVolumeXbtInSecondaryCurrrency",
+                  "LastPrice", "PrimaryCurrencyCode", "SecondaryCurrencyCode"]:
+            self.assertIn(k, resp.json(), msg=(k, resp.json()))
+
+    def test_and_validate_data_for_order_book_endpoint_method_working_correctly(self):
+        api = IndependentReserve()
+        resp = api.order_book(BTCUSD)
+        self.assertEqual(resp.status_code, 200, msg=resp.text)
+
+        # Assert that data is in expected format
+        for k in ["CreatedTimestampUtc", "PrimaryCurrencyCode", "SecondaryCurrencyCode", "BuyOrders", "SellOrders"]:
+            self.assertIn(k, resp.json(), msg=(k, resp.json()))
+
+        buy_order = resp.json()['BuyOrders'][0]
+        sell_order = resp.json()['SellOrders'][0]
+
+        for k in ["OrderType", "Price", "Volume"]:
+            self.assertIn(k, buy_order, msg=(k, resp.json()))
+            self.assertIn(k, sell_order, msg=(k, resp.json()))
+
+    def test_and_validate_data_for_trades_endpoint_method_working_correctly(self):
+        api = IndependentReserve()
+        resp = api.trades(('Xbt', 'Aud'))
+        self.assertEqual(resp.status_code, 200, msg=resp.text)
+        for k in ["CreatedTimestampUtc", "PrimaryCurrencyCode", "SecondaryCurrencyCode", "Trades"]:
+            self.assertIn(k, resp.json(), msg=(k, resp.json()))
+
+        trades = resp.json()['Trades'][0]
+
+        for k in ["PrimaryCurrencyAmount", "SecondaryCurrencyTradePrice", "TradeTimestampUtc"]:
+            self.assertIn(k, trades, msg=(k, resp.json()))
+
+    # Test Private Endpoints
+
+    @unittest.expectedFailure
+    def test_and_validate_data_for_wallet_endpoint_method_working_correctly(self):
+        api = Bter(config='%s/auth/bter.ini' % tests_folder_dir)
+
+        # Assert that if no pair is passed, we get a snapshot of all wallets:
+        resp = api.wallet()
+        self.assertEqual(resp.status_code, 200, msg=resp.text)
+        self.assertTrue(resp.json()['result'], msg=resp.json())
+        self.assertIn('available', resp.json())
+
+    def test_and_validate_data_for_open_orders_endpoint_method_working_correctly(self):
+        api = Bter(config='%s/auth/bter.ini' % tests_folder_dir)
+        # Assert that Bittrex().open_orders() returns a list of dicts with expected
+        # keys
+        resp = api.open_orders()
+        self.assertEqual(resp.status_code, 200, msg=resp.text)
+        self.assertTrue(resp.json()['result'], msg=resp.json())
+
 
 
 if __name__ == '__main__':

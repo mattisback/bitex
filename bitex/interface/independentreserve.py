@@ -49,19 +49,35 @@ class IndependentReserve(RESTInterface):
     def get_valid_secondary_currency_codes(self):
         return self.request('Public/GetValidSecondaryCurrencyCodes')
 
+    @check_and_format_pair
+    def request_public_method_with_currency(self, pair, path, **endpoint_kwargs):
+        endpoint_kwargs['primaryCurrencyCode'] = pair[0]
+        endpoint_kwargs['secondaryCurrencyCode'] = pair[1]
+        return self.request(path, params=endpoint_kwargs)
+
+    @staticmethod
+    def add_pair_to_kwargs(formatted_pair, endpoint_kwargs):
+        endpoint_kwargs['primaryCurrencyCode'] = formatted_pair[0]
+        endpoint_kwargs['secondaryCurrencyCode'] = formatted_pair[1]
+
     @format_response
     @check_and_format_pair
     def ticker(self, pair, *args, **endpoint_kwargs):
         # https://api.independentreserve.com/Public/GetMarketSummary?primaryCurrencyCode=xbt&secondaryCurrencyCode=usd
-        endpoint_kwargs['primaryCurrencyCode'] = pair[0]
-        endpoint_kwargs['secondaryCurrencyCode'] = pair[1]
+        self.add_pair_to_kwargs(pair, endpoint_kwargs)
         return self.request('Public/GetMarketSummary', params=endpoint_kwargs)
 
-    def order_book(self, pair, *args, **kwargs):
-        pass
+    @check_and_format_pair
+    def order_book(self, pair, *args, **endpoint_kwargs):
+        self.add_pair_to_kwargs(pair, endpoint_kwargs)
+        return self.request('Public/GetOrderBook', params=endpoint_kwargs)
 
-    def trades(self, pair, *args, **kwargs):
-        pass
+    @check_and_format_pair
+    def trades(self, pair, *args, **endpoint_kwargs):
+        self.add_pair_to_kwargs(pair, endpoint_kwargs)
+        if 'numberOfRecentTradesToRetrieve' not in endpoint_kwargs:
+            endpoint_kwargs['numberOfRecentTradesToRetrieve'] = 50  # max is 50
+        return self.request('Public/GetRecentTrades', params=endpoint_kwargs)
 
     def ask(self, pair, price, size, *args, **kwargs):
         pass

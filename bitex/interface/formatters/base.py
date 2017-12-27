@@ -5,15 +5,14 @@ class APIResponse(requests.Response):
     """Formatted Response base class"""
 
     def __init__(self, method, params, response):
-        if not isinstance(response, requests.Response):
-            raise TypeError('response parameter must be of type request.Response')
+        assert (isinstance(response, requests.Response))  # can't remember if this is good practice in python
         self.__class__ = type(response.__class__.__name__,
                               (self.__class__, response.__class__),
                               {})
         self.__dict__ = response.__dict__
         self.called_method = method  # need to know the type of method so we know how to format it, just a string
         self.called_method_params = params  # do we need this?
-        self.response = response  # could be called response instead of rawa
+        self.response = response  # could be called response instead of raw
 
     @property
     def formatted(self):

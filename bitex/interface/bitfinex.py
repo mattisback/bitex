@@ -84,6 +84,7 @@ class Bitfinex(RESTInterface):
         return self.request('book/%s/%s' % (pair, prec),
                             params=endpoint_kwargs)
 
+    @format_response
     @check_and_format_pair
     def trades(self, pair, **endpoint_kwargs):
         """Return trades for a given pair."""

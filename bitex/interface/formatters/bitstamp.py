@@ -22,7 +22,23 @@ class BitstampAPIResponse(APIResponse):
         pass
     
     def _format_trades(self, response):
-        pass
+        response_data = response.json()
+        ret_data = []
+        for d in response_data:
+            if d['type'] == '0':
+                t = 'buy'
+            elif d['type'] == '1':
+                t = 'sell'
+            else:
+                t = 'unknown'
+            ret_data.append({
+                'timestamp': datetime.fromtimestamp(float(d['date'])),
+                'price': float(d['price']),
+                'qty': float(d['amount']),
+                'tx_id': str(d['tid']),
+                'type': t,
+            })
+        return ret_data
 
     def _format_ask(self, response):
         pass

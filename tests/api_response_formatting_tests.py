@@ -39,6 +39,23 @@ def check_ticker_format(formatted_response):
     assert isinstance(result['last'], float)
 
 
+def check_trades_format(formatted_response):
+    result = formatted_response.formatted
+    for r in result:
+        assert 'timestamp' in r
+        assert 'price' in r
+        assert 'qty' in r
+        assert 'tx_id' in r
+        assert 'type' in r
+
+        assert isinstance(r['timestamp'], datetime)
+        assert isinstance(r['price'], float)
+        assert isinstance(r['qty'], float)
+        assert isinstance(r['tx_id'], str)
+        assert isinstance(r['type'], str)
+        assert r['type'] in ['buy', 'sell', 'unknown']
+
+
 class BinanceFormattingTests(unittest.TestCase):
     @patch('requests.request')
     def test_ticker(self, mock_request):
@@ -109,6 +126,41 @@ class BitfinexFormattingTests(unittest.TestCase):
                                  'high': 19891.0
                              })
 
+    @patch('requests.request')
+    def test_trades(self, mock_request):
+        mock_request.side_effect = [MockResponse({'btcusd', 'ltcusd'}, 200),  # supported pairs
+                                    MockResponse([{'tid': 130578506,
+                                                   'price': '18684.0',
+                                                   'timestamp': 1513671368,
+                                                   'amount': '0.05511409',
+                                                   'type': 'buy',
+                                                   'exchange': 'bitfinex'},
+                                                  {'tid': 130578507,
+                                                   'price': '18684.0',
+                                                   'timestamp': 1513671368,
+                                                   'amount': '0.05511409',
+                                                   'type': 'sell',
+                                                   'exchange': 'bitfinex'}], 200)]
+
+        formatted_response = bitex.Bitfinex().trades(bitex.BTCUSD)
+
+        check_trades_format(formatted_response)
+        self.assertEqual(formatted_response.formatted,
+                             [{
+                                 'timestamp': datetime(2017, 12, 19, 19, 16, 8),
+                                 'price': 18684.0,
+                                 'qty': 0.05511409,
+                                 'tx_id': '130578506',
+                                 'type': 'buy',
+                             },
+                             {
+                                 'timestamp': datetime(2017, 12, 19, 19, 16, 8),
+                                 'price': 18684.0,
+                                 'qty': 0.05511409,
+                                 'tx_id': '130578507',
+                                 'type': 'sell',
+                             }])
+
 
 class BitstampFormattingTests(unittest.TestCase):
     @patch('requests.request')
@@ -137,6 +189,39 @@ class BitstampFormattingTests(unittest.TestCase):
                                  'volume': 13558.68696337,
                                  'last': 18832.93,
                              })
+
+    @patch('requests.request')
+    def test_trades(self, mock_request):
+        mock_request.side_effect = [  # MockResponse({'btcusd', 'ltcusd'}, 200),  # supported pairs
+                                    MockResponse([{'tid': '34737374',
+                                                   'price': '18897.90',
+                                                   'date': '1513671374',
+                                                   'amount': '0.00267769',
+                                                   'type': '1'},
+                                                  {'tid': '34737374',
+                                                   'price': '18897.90',
+                                                   'date': '1513671374',
+                                                   'amount': '0.00267769',
+                                                   'type': '0'}], 200)]
+
+        formatted_response = bitex.Bitstamp().trades(bitex.BTCUSD)
+
+        check_trades_format(formatted_response)
+        self.assertEqual(formatted_response.formatted,
+                             [{
+                                 'timestamp': datetime(2017, 12, 19, 19, 16, 14),
+                                 'price': 18897.90,
+                                 'qty': 0.00267769,
+                                 'tx_id': '34737374',
+                                 'type': 'sell',
+                              },
+                              {
+                                 'timestamp': datetime(2017, 12, 19, 19, 16, 14),
+                                 'price': 18897.90,
+                                 'qty': 0.00267769,
+                                 'tx_id': '34737374',
+                                 'type': 'buy',
+                             }])
 
 
 class BittrexFormattingTests(unittest.TestCase):

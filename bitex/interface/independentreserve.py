@@ -79,23 +79,39 @@ class IndependentReserve(RESTInterface):
             endpoint_kwargs['numberOfRecentTradesToRetrieve'] = 50  # max is 50
         return self.request('Public/GetRecentTrades', params=endpoint_kwargs)
 
-    def ask(self, pair, price, size, *args, **kwargs):
+    def ask(self, pair, price, size, *args, **endpoint_kwargs):
         pass
 
-    def bid(self, pair, price, size, *args, **kwargs):
+    def bid(self, pair, price, size, *args, **endpoint_kwargs):
         pass
 
-    def order_status(self, order_id, *args, **kwargs):
+    def order_status(self, order_id, *args, **endpoint_kwargs):
         pass
 
-    def open_orders(self, *args, **kwargs):
-        pass
+    def open_orders(self, *args, **endpoint_kwargs):
+        # example response
+        # {'Data': [{'OrderType': 'LimitOffer', 'Volume': 0.082, 'Value': 1845.0, 'OrderGuid': 'e3dd24aa-bf46-4902-ac9c-5ef260edcc0b', 'CreatedTimestampUtc': '2017-12-24T05:41:20.3731526Z', 'FeePercent': 0.005, 'PrimaryCurrencyCode': 'Xbt', 'AvgPrice': 22500.0, 'Outstanding': 0.082, 'Price': 22500.0, 'Status': 'Open', 'SecondaryCurrencyCode': 'Aud'}], 'PageSize': 50, 'TotalPages': 1, 'TotalItems': 1}
+        # primaryCurrencyCode: The primary currency of orders. This is an optional parameter.
+        # secondaryCurrencyCode: The secondary currency of orders. This is an optional parameter.
+        # pageIndex: The page index. Must be greater or equal to 1
+        # pageSize: Must be greater or equal to 1 and less than or equal to 50.
+        #           If a number greater than 50 is specified, then 50 will be used.
+        if 'pageIndex' not in endpoint_kwargs:
+            endpoint_kwargs['pageIndex'] = 1
+        if 'pageSize' not in endpoint_kwargs:
+            endpoint_kwargs['pageSize'] = 50
 
-    def cancel_order(self, *order_ids, **kwargs):
-        pass
+        return self.request('Private/GetOpenOrders', authenticate=True, params=endpoint_kwargs)
 
-    def wallet(self, *args, **kwargs):
-        pass
+    def cancel_order(self, *order_ids, **endpoint_kwargs):
+        # orderGuid: The guid of currently open or partially filled order.
+        endpoint_kwargs['orderGuid'] = order_ids[0]
+        return self.request('Private/CancelOrder', authenticate=True, params=endpoint_kwargs)
+
+    def wallet(self, *args, **endpoint_kwargs):
+        # example response
+        # [{'AvailableBalance': 0.0, 'CurrencyCode': 'Usd', 'AccountGuid': '900aab43-6995-4812-bb02-0b13d60b039b', 'TotalBalance': 0.0, 'AccountStatus': 'Active'}, {'AvailableBalance': 1595.61, 'CurrencyCode': 'Aud', 'AccountGuid': '900aab43-6995-4812-bb02-0b13d60b039b', 'TotalBalance': 1595.61, 'AccountStatus': 'Active'}, {'AvailableBalance': 0.0, 'CurrencyCode': 'Nzd', 'AccountGuid': '900aab43-6995-4812-bb02-0b13d60b039b', 'TotalBalance': 0.0, 'AccountStatus': 'Active'}, {'AvailableBalance': 0.418, 'CurrencyCode': 'Xbt', 'AccountGuid': '900aab43-6995-4812-bb02-0b13d60b039b', 'TotalBalance': 0.5, 'AccountStatus': 'Active'}, {'AvailableBalance': 0.0, 'CurrencyCode': 'Eth', 'AccountGuid': '900aab43-6995-4812-bb02-0b13d60b039b', 'TotalBalance': 0.0, 'AccountStatus': 'Active'}, {'AvailableBalance': 0.0, 'CurrencyCode': 'Bch', 'AccountGuid': '900aab43-6995-4812-bb02-0b13d60b039b', 'TotalBalance': 0.0, 'AccountStatus': 'Active'}]
+        return self.request('Private/GetAccounts', authenticate=True, params=endpoint_kwargs)
 
     ###############
     # Basic Methods

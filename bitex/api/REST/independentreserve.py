@@ -9,11 +9,12 @@ import logging
 import json
 import hashlib
 import hmac
-import base64
 
 # Import Third-Party
 
 # Import Homebrew
+from collections import OrderedDict
+
 from bitex.api.REST import RESTAPI
 
 log = logging.getLogger(__name__)
@@ -33,27 +34,40 @@ class IndependentReserveREST(RESTAPI):
 
     def sign_request_kwargs(self, endpoint, **kwargs):
         """Sign the request."""
-        req_kwargs = super(IndependentReserveREST, self).sign_request_kwargs(endpoint,
-                                                                             **kwargs)
+        req_kwargs = super(IndependentReserveREST, self).sign_request_kwargs(endpoint)
 
-        # Parameters go into headers, so pop params key and generate signature
-        params = req_kwargs.pop('params')
+        url = self.generate_url(self.generate_uri(endpoint))
+        nonce = self.nonce()
 
-        params['request'] = self.generate_uri(endpoint)
-        params['nonce'] = self.nonce()
+        kwparams = kwargs.pop('params')
 
-        # convert to json, encode and hash
-        payload = ','.join(params)  # json.dumps(params)
-        data = base64.standard_b64encode(payload.encode('utf8'))
+        parameters = [
+            url,
+            'apiKey=' + self.key,
+            'nonce=' + str(nonce),
+        ]
 
-        hmac_sig = hmac.new(self.secret.encode('utf8'), data, hashlib.sha256)
-        signature = hmac_sig.hexdigest().upper()
+        for k in kwparams:
+            parameters.append(str(k) + '=' + str(kwparams[k]))
 
-        # Update headers and return
-        req_kwargs['headers'] = {"X-BFX-APIKEY": self.key,
-                                 "X-BFX-SIGNATURE": signature,
-                                 "X-BFX-PAYLOAD": data,
-                                 "Content-Type": "application/json",
-                                 "Accept": "application/json"}
+        message = ','.join(parameters)
+
+        signature = hmac.new(
+            self.secret.encode('utf-8'),
+            msg=message.encode('utf-8'),
+            digestmod=hashlib.sha256).hexdigest().upper()
+
+        # make sure this collection ordered in the same way as parameters
+        data_array = [
+            ("apiKey", self.key),
+            ("nonce", nonce),
+            ("signature", str(signature))]
+        for k in kwparams:
+            data_array.append((k, kwparams[k]))
+
+        data = OrderedDict(data_array)
+
+        req_kwargs['headers'] = {'Content-Type': 'application/json'}
+        req_kwargs['data'] = json.dumps(data, sort_keys=False)
 
         return req_kwargs

@@ -50,6 +50,7 @@ class Bitstamp(RESTInterface):
         """Return the order book for the given pair."""
         return self.request('order_book/%s/' % pair, params=kwargs)
 
+    @format_response
     @check_and_format_pair
     def trades(self, pair, *args, **kwargs):
         """Return trades for the given pair."""

@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import patch
 import time
 import json
-import abc
+import os
 
 # Import Third-Party
 
@@ -1043,24 +1043,21 @@ class IndependentReserveInterfaceTests(unittest.TestCase):
 
     # Test Private Endpoints
 
-    @unittest.expectedFailure
     def test_and_validate_data_for_wallet_endpoint_method_working_correctly(self):
-        api = Bter(config='%s/auth/bter.ini' % tests_folder_dir)
+        api = IndependentReserve(config=os.path.expanduser('~') + '/auth/independentreserve.ini')
 
         # Assert that if no pair is passed, we get a snapshot of all wallets:
-        resp = api.wallet()
+        resp = api.wallet(test='123')
         self.assertEqual(resp.status_code, 200, msg=resp.text)
-        self.assertTrue(resp.json()['result'], msg=resp.json())
-        self.assertIn('available', resp.json())
+        for k in ["AccountGuid", "AccountStatus", "AvailableBalance", "CurrencyCode", "TotalBalance"]:
+            self.assertIn(k, resp.json()[0], msg=(k, resp.json()))
 
     def test_and_validate_data_for_open_orders_endpoint_method_working_correctly(self):
-        api = Bter(config='%s/auth/bter.ini' % tests_folder_dir)
-        # Assert that Bittrex().open_orders() returns a list of dicts with expected
-        # keys
+        api = IndependentReserve(config=os.path.expanduser('~') + '/auth/independentreserve.ini')
+
         resp = api.open_orders()
         self.assertEqual(resp.status_code, 200, msg=resp.text)
         self.assertTrue(resp.json()['result'], msg=resp.json())
-
 
 
 if __name__ == '__main__':

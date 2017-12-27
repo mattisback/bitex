@@ -22,7 +22,20 @@ class BitfinexAPIResponse(APIResponse):
         pass
 
     def _format_trades(self, response):
-        pass
+        response_data = response.json()
+        ret_data = []
+        for d in response_data:
+            t = d['type']
+            if t not in ['buy', 'sell']:
+                t = 'unknown'
+            ret_data.append({
+                'timestamp': datetime.fromtimestamp(float(d['timestamp'])),
+                'price': float(d['price']),
+                'qty': float(d['amount']),
+                'tx_id': str(d['tid']),
+                'type': t,
+            })
+        return ret_data
 
     def _format_ask(self, response):
         pass
